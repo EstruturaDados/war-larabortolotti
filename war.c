@@ -31,7 +31,7 @@
 
 // --- Função Principal (main) ---
 // Função principal que orquestra o fluxo do jogo, chamando as outras funções em ordem.
-int main() {
+//int main() {
     // 1. Configuração Inicial (Setup):
     // - Define o locale para português.
     // - Inicializa a semente para geração de números aleatórios com base no tempo atual.
@@ -51,8 +51,8 @@ int main() {
     // 3. Limpeza:
     // - Ao final do jogo, libera a memória alocada para o mapa para evitar vazamentos de memória.
 
-    return 0;
-}
+    //return 0;
+//}
 
 // --- Implementação das Funções ---
 
@@ -96,3 +96,66 @@ int main() {
 
 // limparBufferEntrada():
 // Função utilitária para limpar o buffer de entrada do teclado (stdin), evitando problemas com leituras consecutivas de scanf e getchar.
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define max_territorio 5                //Definicao de territorios maximos para o jogo 
+
+struct territorio                       //Definicao da Struct com os parametros
+{
+    char nome[30];
+    char cor[10];
+    int tropas;
+};
+
+void LimparBufferdeEntrada (){              //funcao para limbar o Buffer e evitar erros
+    int c; 
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+int main () {
+
+    struct territorio war[max_territorio];     
+
+
+    printf("Bem-vindo ao jogo War.\n");                     //introducao ao jogo
+    printf("Para iniciar defina seus territorios. \n\n");
+
+
+for (int i = 0; i < max_territorio; i++)            //laco for para cadastro dos territorios
+{
+    printf("===================================\n");
+    printf("-----CADASTRO DO TERRITORIO %d----- \n \n", i + 1); 
+    
+    printf("Nome do Territorio: \n");
+    fgets(war[i].nome, 30, stdin);
+
+    printf("Cor do Exercíto: \n");
+    fgets(war[i].cor, 10, stdin);
+
+    war[i].nome[strcspn(war[i].nome, "\n")] = '\0';
+    war[i].cor[strcspn(war[i].cor, "\n")] = '\0';
+
+    printf("Quantidade de Tropas: \n \n");
+    scanf("%d",&war[i].tropas);
+    LimparBufferdeEntrada();   
+
+};
+    printf("===================================\n\n");
+    printf("Seus territorios são: \n \n");
+    
+    
+for (int i = 0; i < max_territorio; i++)                //laco for para impressao dos territorios cadastrados
+{
+    printf("\n");
+    printf("Territorio %d\n", i +1);
+    printf("Nome do Territorio %s \n", war[i].nome);
+    printf("Cor do Exercíto %s \n", war[i].cor);
+    printf("Quantidade de Tropas %d\n", war[i].tropas);
+    printf("========================\n \n");
+}
+
+return 0;
+}
