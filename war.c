@@ -100,8 +100,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#define max_territorio 5                //Definicao de territorios maximos para o jogo 
+#include <time.h> 
 
 struct territorio                       //Definicao da Struct com os parametros
 {
@@ -115,16 +114,60 @@ void LimparBufferdeEntrada (){              //funcao para limbar o Buffer e evit
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
+void ataque (struct territorio *atacante, struct territorio *defensor){     //funcao ataque
+
+    int TropasAtaque = (rand() % 6) + 1;    //aleatorizacao dos dados de ataque
+    int TropasDefesa = (rand() % 6) + 1;    //aleatorizacao dos dados de defesa
+
+    printf("\n %s ataca com %d tropas \n", atacante->nome, TropasAtaque);
+    printf("\n %s defende com %d tropas \n", defensor->nome, TropasDefesa);
+    printf("\n-----RESULTADO DA BATALHA-----\n\n");
+
+    if (TropasAtaque > TropasDefesa)    //logica para ataque
+    {
+        defensor->tropas -= 1;
+        printf("%s Ganhou a rodada, %s perdeu 1 tropa.\n", atacante->nome, defensor->nome);
+
+        if (defensor->tropas <= 0)       //logica para conquista de territorio
+        {
+            printf("%s CONQUISTOU O TERRITORIO DE %s\n", atacante->nome, defensor->nome);
+
+            strcpy(defensor->cor, atacante->cor);   //tranferencia de cor do territorio conquistado para o atacante
+            int TropasTransferidas = atacante->tropas /2;   //tranferencia das tropas.
+                defensor->tropas = TropasTransferidas;
+                atacante->tropas -= TropasTransferidas;
+        
+        }
+    } else
+    {
+        atacante->tropas -= 1;
+        printf("%s Ganhou a rodada, %s perdeu uma tropa\n", defensor->nome, atacante->nome);
+    }
+}
+void LiberarMemoria(struct territorio* mapa){
+    free(mapa);
+}
+
 int main () {
-
-    struct territorio war[max_territorio];     
-
+     
+    int territoriosUsuarios;
+    int opcao;
+    srand(time(NULL));                      //garante numero aleatorizados diferentes em casa rodada
 
     printf("Bem-vindo ao jogo War.\n");                     //introducao ao jogo
-    printf("Para iniciar defina seus territorios. \n\n");
+    printf("Para iniciar defina com quantos territorio sera o jogo:  \n\n");
+    scanf("%d", &territoriosUsuarios);
+    LimparBufferdeEntrada();
+    printf("Cadastre as tropas: \n");
 
-
-for (int i = 0; i < max_territorio; i++)            //laco for para cadastro dos territorios
+    struct territorio*war= (struct territorio*)malloc(territoriosUsuarios*sizeof(struct territorio)); //alocacao dinamica de memoria 
+    if (war == NULL)
+    {
+        printf("ERRO DE ALOCAO DE MEMORIA \n");
+        return 1;
+    }
+    
+for (int i = 0; i < territoriosUsuarios; i++)            //laco for para cadastro dos territorios
 {
     printf("===================================\n");
     printf("-----CADASTRO DO TERRITORIO %d----- \n \n", i + 1); 
@@ -138,24 +181,63 @@ for (int i = 0; i < max_territorio; i++)            //laco for para cadastro dos
     war[i].nome[strcspn(war[i].nome, "\n")] = '\0';
     war[i].cor[strcspn(war[i].cor, "\n")] = '\0';
 
-    printf("Quantidade de Tropas: \n \n");
+    printf("Quantidade de Tropas: \n");
     scanf("%d",&war[i].tropas);
     LimparBufferdeEntrada();   
 
 };
     printf("===================================\n\n");
-    printf("Seus territorios são: \n \n");
+    printf("MAPA DOS TERRITORIOS: \n \n");
     
     
-for (int i = 0; i < max_territorio; i++)                //laco for para impressao dos territorios cadastrados
+for (int i = 0; i < territoriosUsuarios; i++)                //laco for para impressao dos territorios cadastrados
 {
-    printf("\n");
-    printf("Territorio %d\n", i +1);
-    printf("Nome do Territorio %s \n", war[i].nome);
-    printf("Cor do Exercíto %s \n", war[i].cor);
-    printf("Quantidade de Tropas %d\n", war[i].tropas);
-    printf("========================\n \n");
+    printf("%d- %s (Exercito: %s, Tropas: %d) \n", i +1, war[i].nome, war[i].cor, war[i].tropas);
 }
 
+printf("\n------FASE DE ATAQUE------\n\n");
+
+do {
+    printf("\nEscolha um territorio atacante, ou 0 para sair: \n");
+    scanf("%d", &opcao);
+    LimparBufferdeEntrada();
+
+    if (opcao == 0 )
+    { 
+        printf("Saindo do jogo \n");
+        break;
+    } else if (opcao > 0 && opcao <= territoriosUsuarios) //condicional para ataque valido 
+    {
+        int atacante = opcao - 1;       //variavel de ataque, "opcao - 1 devido ao array"
+        int defensor;
+
+        printf("\nTERRITORIO ATACANTE: %s\n\n", war[atacante].nome);
+
+        printf("Escolha o territorio defensor: \n");
+        scanf("%d", &defensor);
+        LimparBufferdeEntrada();
+        defensor--;
+
+        if (defensor >= 0 && defensor < territoriosUsuarios && defensor != atacante) //condicional de defensor valido
+        {            
+            printf("\n TERRITORIO DEFENSOR: %s \n", war[defensor].nome);
+
+            ataque(&war[atacante], &war[defensor]); //chama a funcao ataque
+
+        for (int i = 0; i < territoriosUsuarios; i++)   //atualizacao de territorio
+        {
+            printf("\n%d- %s (Exercito: %s, Tropas: %d) \n", i +1, war[i].nome, war[i].cor, war[i].tropas);
+        }
+                
+        } else { 
+            printf("Opcao invalida \n");
+        }
+    } else
+    {
+        printf("Opcao invalida \n");
+    }
+
+} while (1);
+LiberarMemoria(war);        //chama a funcao de liberarr a memoria
 return 0;
 }
